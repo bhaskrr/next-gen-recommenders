@@ -4,7 +4,7 @@ Next-Gen Recommenders is a research-focused repository where I implement and exp
 
 ## Datasets Used
 
-- MovieLens (small)
+- [MovieLens (small)](https://files.grouplens.org/datasets/movielens/ml-latest-small.zip)
 
 ## If You Find This Interesting
 
