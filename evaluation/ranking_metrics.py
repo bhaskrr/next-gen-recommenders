@@ -69,3 +69,17 @@ def average_precision_at_k(recommended, relevant, k):
             score += hits / (i + 1)
 
     return score / min(len(relevant_set), k)
+
+# The Reciprocal Rank (RR) for a single query is simply the inverse of the rank of the first relevant item.
+def rr_at_k(recommended, relevant, k):
+    """
+    Mean Reciprocal Rank@K
+    """
+    recommended_k = recommended[:k]
+
+    for i, item in enumerate(recommended_k):
+        if item in relevant:
+            return 1.0 / (i + 1)
+
+    return 0.0
+
