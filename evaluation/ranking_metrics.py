@@ -45,3 +45,27 @@ def hit_rate_at_k(recommended, relevant, k):
     recommended_k = recommended[:k]
     hits = len(set(recommended_k) & relevant)
     return 1.0 if len(hits) > 0 else 0.0
+
+# In a recommendation system, it’s not just about what you recommend, but the order in which you recommend it.
+# Average Precision measures two things simultaneously:
+# Precision: How many of the recommended items were actually relevant?
+# Order (Ranking): Were the relevant items placed at the top of the list?
+def average_precision_at_k(recommended, relevant, k):
+    """
+    Returns average precision@K
+    """
+    recommended_k = recommended[:k]
+    relevant_set = set(relevant)
+    
+    if not relevant_set:
+        return 0.0
+
+    score = 0.0
+    hits = 0
+
+    for i, item in enumerate(recommended_k):
+        if item in relevant_set:
+            hits += 1
+            score += hits / (i + 1)
+
+    return score / min(len(relevant_set), k)
