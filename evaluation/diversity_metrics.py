@@ -106,3 +106,42 @@ def popularity_bias_at_k(predictions, item_popularity, k):
             popularity_scores.append(pop)
 
     return np.mean(popularity_scores)
+
+
+def catalog_coverage(predictions, total_items_count):
+    """
+    Calculates the percentage of unique items recommended at least once
+    across all users compared to the total items available in the catalog.
+
+    This metric assesses the ability of a recommendation system to suggest
+    a wide variety of items from the entire inventory, rather than
+    concentrating on a small subset of popular items.
+
+    Args:
+        predictions (dict): A dictionary where keys are user IDs and values
+            are lists of item IDs recommended to those users.
+        total_items_count (int): The total number of unique items available
+            in the entire dataset (the catalog size).
+
+    Returns:
+        float: The coverage ratio (between 0.0 and 1.0).
+            - 1.0 means every item in the catalog was recommended at least once.
+            - 0.0 means no items were recommended.
+
+    Example:
+        >>> preds = {'u1': [101, 102], 'u2': [101, 103]}
+        >>> catalog_coverage(preds, 1000)
+        0.003  # (3 unique items / 1000 total items)
+    """
+    # Use a set to store all unique items recommended to any user
+    recommended_items = set()
+
+    for recommended_list in predictions.values():
+        # .update() adds all elements of the list to the set efficiently
+        recommended_items.update(recommended_list)
+
+    # Avoid ZeroDivisionError if the catalog count is incorrectly passed as 0
+    if total_items_count == 0:
+        return 0.0
+
+    return len(recommended_items) / total_items_count
