@@ -1,3 +1,5 @@
+import numpy as np
+
 # Intra-list diversity (ILD) metrics measure the variety of items in a single, top-N recommendation list
 # to prevent redundant, monotonous suggestions
 
@@ -31,3 +33,24 @@ def intra_list_diversity(recommended, item_similarity_matrix, k):
             count += 1
 
     return total_dissimilarity / count if count > 0 else 0.0
+
+
+# Popularity bias in recommender systems is the tendency to disproportionately recommend a small number of highly popular items,
+# neglecting the vast, less-popular "long-tail" items. This stems from models learning from skewed historical data,
+# often resulting in lower-quality, less diverse recommendations that create a reinforcing feedback loop for popular content.
+
+
+def popularity_bias_at_k(predictions, item_popularity, k):
+    """
+    Returns average popularity of recommended items
+    """
+    popularity_scores = []
+
+    for recommended in predictions.values():
+        recommended_k = recommended[:k]
+
+        for item in recommended_k:
+            pop = item_popularity.get(item, 0)
+            popularity_scores.append(pop)
+
+    return np.mean(popularity_scores)
