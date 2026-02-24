@@ -129,3 +129,45 @@ def dcg_at_k(recommended_scores, k):
     return 0.0
 
 
+def ndcg_at_k(recommended, relevant, k):
+    """
+    Computes the Normalized Discounted Cumulative Gain (NDCG) at rank k.
+
+    NDCG normalizes the DCG score by the Ideal DCG (IDCG), which is the maximum
+    possible DCG achievable if the most relevant items were perfectly ranked
+    at the top. This provides a score between 0.0 and 1.0, making it possible
+    to compare model performance across different security datasets.
+
+    The formula used is:
+    $$NDCG_{k} = \frac{DCG_{k}}{IDCG_{k}}$$
+
+    Args:
+        recommended (array-like): The relevance scores assigned by the model
+            to the top-k items (e.g., [3, 2, 0, 1]).
+        relevant (array-like): The ground-truth relevance scores for all
+            available items, used to calculate the ideal ranking.
+        k (int): The number of top-ranked items to evaluate.
+
+    Returns:
+        float: The normalized DCG value (0.0 to 1.0). Returns 0.0 if there
+            are no relevant items or k is 0.
+
+    Example:
+        >>> model_scores = [3, 2, 0, 1]
+        >>> ground_truth = [3, 3, 2, 2, 1]
+        >>> ndcg_at_k(model_scores, ground_truth, 3)
+        0.875...
+    """
+    # Calculate the number of relevant items to consider for the ideal ranking
+    ideal_hits = min(len(relevant), k)
+
+    if ideal_hits == 0:
+        return 0.0
+
+    # IDCG assumes the highest relevance scores are at the top (1/log2(i+2))
+    ideal_dcg = sum(1 / np.log2(i + 2) for i in range(ideal_hits))
+
+    # Calculate the actual DCG using the model's recommended ranking
+    actual_dcg = dcg_at_k(recommended, k)
+
+    return actual_dcg / ideal_dcg
