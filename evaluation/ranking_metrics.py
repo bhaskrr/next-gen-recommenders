@@ -1,3 +1,6 @@
+import numpy as np
+
+
 # Precision@K=∣Recommended ∩ Relevant∣/K
 def precision_at_k(recommended, relevant, k):
     """
@@ -33,6 +36,7 @@ def recall_at_k(recommended, relevant, k):
     hits = len(set(recommended_k) & relevant)
     return hits / len(relevant)
 
+
 # A hit occurs when an item recommended to a user in their Top-list is
 # actually consumed, clicked, or highly rated by that user in the test set.
 # In our case, if any of the recommended items in top k are relevant to the user, we will consider it a hit
@@ -41,10 +45,11 @@ def hit_rate_at_k(recommended, relevant, k):
     """
     Returns 1 if at least one relevant item appears in top-k
     """
-    
+
     recommended_k = recommended[:k]
     hits = len(set(recommended_k) & relevant)
     return 1.0 if len(hits) > 0 else 0.0
+
 
 # In a recommendation system, it’s not just about what you recommend, but the order in which you recommend it.
 # Average Precision measures two things simultaneously:
@@ -56,7 +61,7 @@ def average_precision_at_k(recommended, relevant, k):
     """
     recommended_k = recommended[:k]
     relevant_set = set(relevant)
-    
+
     if not relevant_set:
         return 0.0
 
@@ -70,6 +75,7 @@ def average_precision_at_k(recommended, relevant, k):
 
     return score / min(len(relevant_set), k)
 
+
 # The Reciprocal Rank (RR) for a single query is simply the inverse of the rank of the first relevant item.
 def rr_at_k(recommended, relevant, k):
     """
@@ -82,4 +88,44 @@ def rr_at_k(recommended, relevant, k):
             return 1.0 / (i + 1)
 
     return 0.0
+
+
+# DCG calculates the cumulative gain (relevance score) of items, but discounts it if the item appears lower in the list.
+# This reflects that users are more likely to interact with top-ranked items.
+
+
+def dcg_at_k(recommended_scores, k):
+    """
+    Computes the Discounted Cumulative Gain (DCG) at a specific rank.
+
+    DCG measures the effectiveness of a ranking system by summing the
+    relevance scores of items, penalizing (discounting) those that appear
+    lower in the list. In security mining, this helps evaluate how well
+    a model ranks critical threats versus low-priority noise.
+
+    The formula used is:
+    $$DCG_{k} = \sum_{i=1}^{k} \frac{2^{rel_i} - 1}{\log_2(i + 1)}$$
+
+    Args:
+        recommended_scores (array-like): A list or array of relevance scores
+            (e.g., [3, 2, 0, 1]). Higher values represent higher relevance.
+        k (int): The number of top-ranked items to consider in the calculation.
+
+    Returns:
+        float: The calculated DCG value. Returns 0.0 if the input is empty
+            or k is 0.
+
+    Example:
+        >>> scores = [3, 2, 3, 0, 1, 2]
+        >>> dcg_at_k(scores, 3)
+        12.3927...
+    """
+    recommended_scores = np.asfarray(recommended_scores)[:k]
+    if recommended_scores.size:
+        return np.sum(
+            (2**recommended_scores - 1)
+            / np.log2(np.arange(2, recommended_scores.size + 2))
+        )
+    return 0.0
+
 
