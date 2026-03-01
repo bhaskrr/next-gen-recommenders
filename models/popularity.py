@@ -31,3 +31,18 @@ class PopularityRecommender:
                 break
                 
         return recommendations
+
+    def recommend_all(self, user_train_items, k=10):
+        """
+        Generate recommendations for all users.
+        """
+        predictions = {}
+        
+        for user_id in user_train_items.keys():
+            predictions[user_id] = self.recommend(
+                user_id,
+                user_train_items,
+                k
+            )
+        
+        return predictions
